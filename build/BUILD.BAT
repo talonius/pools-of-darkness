@@ -1,9 +1,9 @@
 @echo off
 rem  Build the four shipped artifacts for Pools of Darkness v1.10.
-rem  Run with gametools/build.sh --game pools --ver v11. The driver creates
+rem  Run with build.sh in the repository root, which creates
 rem  obj\ and build\logs\, mounts the drives, and calls this batch:
-rem      C: = drive_c (read-only)  D: = toolchain\TP6-1990  E: = v11
-rem      F: = toolchain\TASM       G: = toolchain\EXEPACK
+rem      C: = drive_c             D: = drive_c\TP6-1990  E: = this repository
+rem      F: = drive_c\TASM        G: = drive_c\EXEPACK
 rem  Keep a separate drive for each tool and each PATH at three characters;
 rem  longer paths consume memory needed by the whole-image link.
 rem  TASM writes objects to obj\; TPC's /E directs EXEs, OVR, MAPs and TPUs
