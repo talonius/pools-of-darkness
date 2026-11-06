@@ -167,6 +167,10 @@ begin
 
   GameIo.ZeroFill(GDVars.symbolSets, SizeOf(GDVars.symbolSets));
   GameIo.ZeroFill(GDVars.mapTileSheet, SizeOf(GDVars.mapTileSheet));
+  GDVars.drvImageBuffer := nil;
+  GDVars.drvParamsBuffer := nil;
+  GetMem(GDVars.drvImageBuffer, 13000);
+  GetMem(GDVars.drvParamsBuffer, 6144);
 
   GameIo.ZeroFill(GDVars.backdropPicture, SizeOf(GDVars.backdropPicture) + SizeOf(GDVars.skyPicture));
   GDVars.prevSkyId := 0;
@@ -280,10 +284,6 @@ begin
   GameInit.LoadItems;
   GetMem(GDVars.soundStagingBuf, 9000);
   GameInit.LoadSoundDefs;
-  GDVars.drvImageBuffer := nil;
-  GDVars.drvParamsBuffer := nil;
-  GetMem(GDVars.drvImageBuffer, 13000);
-  GetMem(GDVars.drvParamsBuffer, 6144);
 end;
 
 procedure ResetGameState;

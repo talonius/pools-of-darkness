@@ -5,7 +5,7 @@ unit SaveLoad;
 interface
 
 uses Portrait, C_Stat, Dos, GameIo, Types, GDConsts, GDVars, Blit, MapTiles, ClassCal,
-  DaxIo, MenuCore, TextRend, CharHlp, FxEngine, ZeroFree, View3D, Sym8x8, C_Keys, C_Npc, C_Video, C_Ifc;
+  DaxIo, MenuCore, TextRend, CharHlp, FxEngine, ZeroFree, View3D, Sym8x8, C_Keys, C_Npc, C_Video, C_Ifc, C_Race;
 
 { Lists the characters that can join the party from the current storage. NPCs and characters already in the party are
   left out. Both lists stay nil when the save directory is not ready.
@@ -37,8 +37,9 @@ procedure DeleteCharacterFiles(characterData: Pointer);
 procedure SaveChar(characterData: Pointer; resourceName: Types.TResourceName);
 
 { Loads a character, with its items and effects, from the current storage. A legacy record is converted to the current
-  layout and its items are carried over, skipping containers along with their contents and giving bundles a count of 2.
-  Files read in transfer mode are deleted.
+  layout: a human's dual-class level is taken from its old levels, and hit points lost to the constitution recalculation
+  are added back to the rolled hit points. Its items are carried over, skipping containers along with their contents,
+  giving bundles a count of 2, and updating item kind 58. Files read in transfer mode are deleted.
   @param(characterFileName The character's file name, extension included.)
   @param(characterData Receives the character, a Types.PCharRecord.)
   @param(savedGame Unused.)
@@ -474,6 +475,8 @@ var
   legacyChar: Types.PBytes;
   recordSize: Word;
   fileOffset: LongInt;
+  oldLevelIndex: ShortInt;
+  importedHpMax: Byte;
 begin
   case GDVars.sharedScratch.storageMode of
     SaveLoad.SAVE_STORAGE: begin
@@ -538,6 +541,19 @@ begin
          Types.PCharRecord(characterData)^.creatureType := 2;
          Types.PCharRecord(characterData)^.immunities := 2;
          FreeMem(legacyChar, 439);
+         with Types.PCharRecord(characterData)^ do begin
+           dualLevel := 0;
+           if Types.PCharRecord(characterData)^.race = C_Race.HUMAN then
+             for oldLevelIndex := 0 to 6 do
+               if oldLevels[oldLevelIndex] > dualLevel then
+                 dualLevel := oldLevels[oldLevelIndex];
+         end;
+         importedHpMax := Types.PCharRecord(characterData)^.hpMax;
+         FxEngine.RecalcAbility(characterData, C_Stat.CONSTITUTION);
+         if Types.PCharRecord(characterData)^.hpMax < importedHpMax then begin
+           Inc(Types.PCharRecord(characterData)^.hpRolled, importedHpMax - Types.PCharRecord(characterData)^.hpMax);
+           FxEngine.RecalcAbility(characterData, C_Stat.CONSTITUTION);
+         end;
        end;
     SaveLoad.SAVE_STORAGE, SaveLoad.TRANSFER_STORAGE: begin
          BlockRead(charFile, Types.PCharRecord(characterData)^, SizeOf(Types.TCharRecord), bytesRead);
@@ -577,6 +593,8 @@ begin
             end;
             if itemBuf^.definition.itemType = 45 then
               itemBuf^.definition.plus := 2;
+            if itemBuf^.definition.itemType = 58 then
+              itemBuf^.definition.effect := 89;
             itemTail^ := itemBuf^;
             itemTail^.next := nil;
           end;

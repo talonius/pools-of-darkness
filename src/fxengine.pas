@@ -8,8 +8,8 @@ unit FxEngine;
 
 interface
 
-uses Types, GDConsts, GDVars, Blit, TextRend, CharHlp, Pathing, CbtMap, C_Effect, C_Class, C_Stat,
-  C_Cond, C_Dir, C_Ifc, C_Item, C_Npc, C_Status, C_Terr;
+uses Types, GDConsts, GDVars, Blit, TextRend, CharHlp, Pathing, CbtMap, C_Effect, C_Class, C_Race,
+  C_Stat, C_Cond, C_Dir, C_Ifc, C_Item, C_Npc, C_Status, C_Terr;
 
 { Prints a message after a creature's name. Unless the creature is already stoned, dead or gone, it then gives it the
   status, takes it out of play at 0 hit points, removes its effects that end at 0 hit points, runs its condition-13
@@ -21,6 +21,7 @@ uses Types, GDConsts, GDVars, Blit, TextRend, CharHlp, Pathing, CbtMap, C_Effect
 procedure KillCreature(cr: Pointer; status: Byte; msg: Types.TStr40);
 
 { Calls the handler for an effect. While the item-effect override flag is set, each call goes to handler 127 instead.
+  Otherwise ids 127 and above are ignored.
   @param(effId The effect.)
   @param(cr The creature, passed on to the handler.)
   @param(p The effect record or item that owns the effect, passed on.)
@@ -223,7 +224,7 @@ procedure CallEffectHandler(effId: Byte; var cr; p: Pointer; removed: Boolean);
 begin
   if GDVars.sharedScratch.itemEffectOverride <> 0 then
     GDVars.effectFns[C_Effect.ITEM_EFFECT](cr, p, removed)
-  else
+  else if effId < 127 then
     GDVars.effectFns[effId](cr, p, removed);
 end;
 
@@ -995,13 +996,17 @@ begin
            tmp := Types.PCharRecord(cr)^.oldLevels[i];
            if tmp > 0 then StatBonus(i, tmp);
            tmp := Types.PCharRecord(cr)^.classLevels[i];
-           if tmp > 0 then
+           if tmp > 0 then begin
              Inc(count);
-           if GDConsts.firstFixedHpLevel[i] < tmp then tmp := GDConsts.firstFixedHpLevel[i];
-           { The bonus counts only the levels above the level of the class left behind by dual-classing. }
-           if tmp > Types.PCharRecord(cr)^.dualLevel then begin
-             Dec(tmp, Types.PCharRecord(cr)^.dualLevel);
-             StatBonus(i, tmp);
+             if GDConsts.firstFixedHpLevel[i] < tmp then tmp := GDConsts.firstFixedHpLevel[i];
+             { A dual-classed human earns the bonus only for levels in the new class above the level of the old one. }
+             if Types.PCharRecord(cr)^.race = C_Race.HUMAN then begin
+               if tmp > Types.PCharRecord(cr)^.dualLevel then begin
+                 Dec(tmp, Types.PCharRecord(cr)^.dualLevel);
+                 StatBonus(i, tmp);
+               end;
+             end else
+               StatBonus(i, tmp);
            end;
          end;
          { Note: a creature with no class levels makes count zero here. }

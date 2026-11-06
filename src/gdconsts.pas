@@ -726,7 +726,7 @@ const
   { the empty prompt of a menu that asks nothing }
   emptyQuery: String[40] = '';
   { the in-game version }
-  versionBanner: String[40] = 'POOLS OF DARKNESS 1.00 ';
+  versionBanner: String[40] = 'POOLS OF DARKNESS 1.10 ';
   { the spell menu's prompt }
   chooseSpellPrompt: String[40] = 'Choose Spell:';
   { asks which kind of flame a spell makes }

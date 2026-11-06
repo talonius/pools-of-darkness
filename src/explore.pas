@@ -3,7 +3,7 @@
   MapMainMenu drives either the first-person dungeon controls (interface state 4) or the overland map's compass controls
   (state 3). ResolveMovement applies the chosen dungeon step or scrolls the overland map window, then releases the
   portrait animation. The Area action toggles the automap only where the area is not restricted, or when command-line
-  parameter 3 matches the debug word ModeInit sets up. }
+  parameter 3 matches the debug word ModeInit sets up. Toggling the automap marks the palette dirty before the redraw. }
 {$O+,F+,S-,R-,V-,B-,I-}
 unit Explore;
 
@@ -147,6 +147,7 @@ begin
                  if (GDVars.vmBand.zone0^.areaRestricted = 0) or
                      (ParamStr(3) = GDVars.debugPassword) then begin
                    GDVars.automapShown := Byte(GDVars.automapShown = 0);
+                   GDVars.viewPaletteDirty := True;
                    View3D.Display3DMapView(GDVars.mapState.x, GDVars.mapState.y, GDVars.mapState.facing);
                  end else
                    TextRend.PrintAndPause(GDConsts.notHereMsg, 14, 0);

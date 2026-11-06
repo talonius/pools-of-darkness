@@ -1,10 +1,10 @@
 { STARTUP.EXE, the configuration program START.BAT runs before CONTROL.EXE.
 
   It asks for the sound card, graphics adapter, alternate input and the two save paths, writes the answers to pool4.cfg,
-  calibrates the joystick, and copies the chosen DIGPAK driver over snd.exe. The second save path is the save directory
+  calibrates the joystick, and copies the chosen DIGPAK driver over snd.com. The second save path is the save directory
   of the earlier game whose characters can be imported.
 
-  When pool4.cfg already exists the questions are skipped; the driver is then copied only if snd.exe is missing. }
+  When pool4.cfg already exists the questions are skipped; the driver is then copied only if snd.com is missing. }
 
 {$I-,O+,V-}
 {$M 16384,0,0}
@@ -81,7 +81,7 @@ begin
   FileExists := (DosError = 0) and (Length(fileName) <> 0);
 end;
 
-{ Copies a driver file over snd.exe, if it exists.
+{ Copies a driver file over snd.com, if it exists.
   @param(srcName The driver file.) }
 procedure InstallDriver(srcName: string);
 var
@@ -94,8 +94,8 @@ begin
     count := FileSize(driverFile);
     BlockRead(driverFile, copyBuffer, count);
     Close(driverFile);
-    Assign(driverFile, 'snd.Exe');
-    if FileExists('snd.exe') then
+    Assign(driverFile, 'snd.com');
+    if FileExists('snd.com') then
       Erase(driverFile);
     Rewrite(driverFile, 1);
     BlockWrite(driverFile, copyBuffer, count);
@@ -367,24 +367,24 @@ begin
   end;
   if FileExists('pool4.cfg') then
   begin
-    if not (FileExists('snd.exe') and not wroteCfg) then
+    if not (FileExists('snd.com') and not wroteCfg) then
     begin
       Assign(cfg, 'pool4.cfg');
       Reset(cfg);
       Readln(cfg, soundKind);
       Close(cfg);
       case soundKind of
-        '1': pathBuf := 'sblaster.exe';
-        '2': pathBuf := 'adlib.exe';
-        '3': pathBuf := 'tanextx.exe';
-        '4': pathBuf := 'tansltl.exe';
-        '5': pathBuf := 'ibmsnd.exe';
+        '1': pathBuf := 'sblaster.com';
+        '2': pathBuf := 'adlib.com';
+        '3': pathBuf := 'tanextx.com';
+        '4': pathBuf := 'tansltl.com';
+        '5': pathBuf := 'ibmsnd.com';
       end;
       if soundKind <> '6' then
         InstallDriver(pathBuf)
-      else if FileExists('snd.exe') then
+      else if FileExists('snd.com') then
       begin
-        Assign(driver, 'snd.exe');
+        Assign(driver, 'snd.com');
         Close(driver);
         Erase(driver);
       end;

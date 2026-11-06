@@ -1,8 +1,8 @@
 @echo off
-rem  Build the four shipped artifacts for Pools of Darkness v1.00.
-rem  Run with gametools/build.sh --game pools --ver v10. The driver creates
+rem  Build the four shipped artifacts for Pools of Darkness v1.10.
+rem  Run with gametools/build.sh --game pools --ver v11. The driver creates
 rem  obj\ and build\logs\, mounts the drives, and calls this batch:
-rem      C: = drive_c (read-only)  D: = toolchain\TP6-1990  E: = v10
+rem      C: = drive_c (read-only)  D: = toolchain\TP6-1990  E: = v11
 rem      F: = toolchain\TASM       G: = toolchain\EXEPACK
 rem  Keep a separate drive for each tool and each PATH at three characters;
 rem  longer paths consume memory needed by the whole-image link.
